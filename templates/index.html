@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        button {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .fraud {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+
+        .legitimate {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Fraud Detection System</h1>
+            <p class="subtitle">Analyze credit card transactions for potential fraud</p>
+        </header>
+
+        <div class="form-container">
+            <form id="fraudForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="Year">Year</label>
+                        <input type="number" id="Year" name="Year" min="2000" max="2030" value="2023" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Month">Month</label>
+                        <input type="number" id="Month" name="Month" min="1" max="12" value="10" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Day">Day</label>
+                        <input type="number" id="Day" name="Day" min="1" max="31" value="15" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="Amount">Amount ($)</label>
+                    <input type="number" id="Amount" name="Amount" step="0.01" min="0" value="50.00" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="Use_Chip">Use Chip</label>
+                    <select id="Use_Chip" name="Use_Chip" required>
+                        <option value="Swipe Transaction">Swipe Transaction</option>
+                        <option value="Chip Transaction">Chip Transaction</option>
+                        <option value="Online Transaction">Online Transaction</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="Zip">Zip Code</label>
+                    <input type="number" id="Zip" name="Zip" min="10000" max="99999" value="12345" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="MCC">Merchant Category Code (MCC)</label>
+                    <input type="number" id="MCC" name="MCC" min="0" value="5411" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="hours">Hour (0-23)</label>
+                        <input type="number" id="hours" name="hours" min="0" max="23" value="14" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="minute">Minute (0-59)</label>
+                        <input type="number" id="minute" name="minute" min="0" max="59" value="30" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="Merchant_City">Merchant City</label>
+                    <input type="text" id="Merchant_City" name="Merchant_City" value="New York" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="Merchant_State">Merchant State</label>
+                    <input type="text" id="Merchant_State" name="Merchant_State" value="NY" required>
+                </div>
+
+                <button type="submit">Check for Fraud</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing transaction...</p>
+            </div>
+
+            <div class="result-container" id="resultContainer">
+                <h2 class="result-title" id="resultTitle">Transaction Analysis Result</h2>
+                <p id="resultMessage">This transaction appears to be legitimate.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Fraud Detection System &copy; 2023 | Powered by Machine Learning</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('fraudForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+
+            // Collect form data
+            const formData = new FormData(this);
+            const data = {
+                Year: parseInt(formData.get('Year')),
+                Month: parseInt(formData.get('Month')),
+                Day: parseInt(formData.get('Day')),
+                Amount: parseFloat(formData.get('Amount')),
+                Use_Chip: formData.get('Use_Chip'),
+                Zip: parseFloat(formData.get('Zip')),
+                MCC: parseInt(formData.get('MCC')),
+                hours: parseInt(formData.get('hours')),
+                minute: parseInt(formData.get('minute')),
+                Merchant_City: formData.get('Merchant_City'),
+                Merchant_State: formData.get('Merchant_State')
+            };
+
+            try {
+                // Send request to backend
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+
+                // Hide loading indicator
+                document.getElementById('loading').style.display = 'none';
+
+                // Display result
+                const resultContainer = document.getElementById('resultContainer');
+                const resultTitle = document.getElementById('resultTitle');
+                const resultMessage = document.getElementById('resultMessage');
+
+                if (result.predicted_price === 1) {
+                    resultContainer.className = 'result-container fraud';
+                    resultTitle.textContent = 'Potential Fraud Detected!';
+                    resultMessage.textContent = 'This transaction has been flagged as potentially fraudulent. Please verify with the cardholder.';
+                } else {
+                    resultContainer.className = 'result-container legitimate';
+                    resultTitle.textContent = 'Transaction Legitimate';
+                    resultMessage.textContent = 'This transaction appears to be legitimate based on our analysis.';
+                }
+
+                resultContainer.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+
+                // Show error message
+                const resultContainer = document.getElementById('resultContainer');
+                resultContainer.className = 'result-container fraud';
+                resultContainer.innerHTML = `
+                    <h2 class="result-title">Error</h2>
+                    <p>There was an error processing your request. Please try again.</p>
+                `;
+                resultContainer.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
